@@ -1,0 +1,115 @@
+services:
+  # ==========================================
+  # Frontend Web Client
+  # ==========================================
+  frontend:
+    container_name: moodle-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - CORE_SERVICE_URL=http://backend-core:8000
+      - COURSES_SERVICE_URL=http://backend-courses:8001
+      - AI_SERVICE_URL=http://backend-ai:8002
+      # Client-side API URLs for browser access
+      - NEXT_PUBLIC_CORE_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_COURSES_API_URL=http://localhost:8001
+      - NEXT_PUBLIC_AI_API_URL=http://localhost:8002
+      - REACT_APP_CORE_API_URL=http://localhost:8000
+      - REACT_APP_COURSES_API_URL=http://localhost:8001
+      - REACT_APP_AI_API_URL=http://localhost:8002
+      - VITE_CORE_API_URL=http://localhost:8000
+      - VITE_COURSES_API_URL=http://localhost:8001
+      - VITE_AI_API_URL=http://localhost:8002
+    depends_on:
+      - backend-core
+      - backend-courses
+      - backend-ai
+    networks:
+      - moodle-network
+    restart: unless-stopped
+
+  # ==========================================
+  # Team 1: Core & User Management Microservice
+  # ==========================================
+  backend-core:
+    container_name: moodle-backend-core
+    build:
+      context: ./backend-core
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - PORT=8000
+      - SERVICE_NAME=backend-core
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+    networks:
+      - moodle-network
+    restart: unless-stopped
+
+  # ==========================================
+  # Team 2: Course Content & Assignments Microservice
+  # ==========================================
+  backend-courses:
+    container_name: moodle-backend-courses
+    build:
+      context: ./backend-courses
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    environment:
+      - PORT=8001
+      - SERVICE_NAME=backend-courses
+      - CORE_SERVICE_URL=http://backend-core:8000
+      - AI_SERVICE_URL=http://backend-ai:8002
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+    depends_on:
+      - backend-core
+    networks:
+      - moodle-network
+    restart: unless-stopped
+
+  # ==========================================
+  # Team 3: AI Smart Assistant Microservice
+  # ==========================================
+  backend-ai:
+    container_name: moodle-backend-ai
+    build:
+      context: ./backend-ai
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    env_file:
+      - .env
+    environment:
+      - PORT=8002
+      - SERVICE_NAME=backend-ai
+      - CORE_SERVICE_URL=http://backend-core:8000
+      - GOOGLE_AI_KEY=${GOOGLE_AI_KEY}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+    depends_on:
+      - backend-core
+    networks:
+      - moodle-network
+    restart: unless-stopped
+
+# ==========================================
+# Shared Internal Network
+# ==========================================
+networks:
+  moodle-network:
+    name: moodle-network
+    driver: bridge
