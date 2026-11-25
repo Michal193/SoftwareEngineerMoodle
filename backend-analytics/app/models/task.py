@@ -13,6 +13,12 @@ class TaskCreate(BaseModel):
     status: TaskStatus = "pending"
 
 
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    due_date: Optional[datetime] = None
+    status: Optional[TaskStatus] = None
+
+
 class Task(TaskCreate):
     id: int
     created_at: datetime
