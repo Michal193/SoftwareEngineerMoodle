@@ -17,6 +17,7 @@ services:
       - CORE_SERVICE_URL=http://backend-core:8000
       - COURSES_SERVICE_URL=http://backend-courses:8001
       - AI_SERVICE_URL=http://backend-ai:8002
+      - ANALYTICS_SERVICE_URL=http://backend-analytics:8003
       # Client-side API URLs for browser access
       - NEXT_PUBLIC_CORE_API_URL=http://localhost:8000
       - NEXT_PUBLIC_COURSES_API_URL=http://localhost:8001
@@ -27,10 +28,12 @@ services:
       - VITE_CORE_API_URL=http://localhost:8000
       - VITE_COURSES_API_URL=http://localhost:8001
       - VITE_AI_API_URL=http://localhost:8002
+      - VITE_ANALYTICS_API_URL=http://localhost:8003
     depends_on:
       - backend-core
       - backend-courses
       - backend-ai
+      - backend-analytics
     networks:
       - moodle-network
     restart: unless-stopped
@@ -98,6 +101,30 @@ services:
       - SERVICE_NAME=backend-ai
       - CORE_SERVICE_URL=http://backend-core:8000
       - GOOGLE_AI_KEY=${GOOGLE_AI_KEY}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+    depends_on:
+      - backend-core
+    networks:
+      - moodle-network
+    restart: unless-stopped
+
+  # ==========================================
+  # Analytics & Notifications Service
+  # ==========================================
+  backend-analytics:
+    container_name: moodle-backend-analytics
+    build:
+      context: ./backend-analytics
+      dockerfile: Dockerfile
+    ports:
+      - "8003:8003"
+    env_file:
+      - .env
+    environment:
+      - PORT=8003
+      - SERVICE_NAME=backend-analytics
+      - CORE_SERVICE_URL=http://backend-core:8000
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_KEY=${SUPABASE_KEY}
     depends_on:
