@@ -7,6 +7,10 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    # Dev hot reload for React (node_modules stays inside the container)
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/index.html:/app/index.html
     ports:
       - "3000:3000"
     env_file:
@@ -46,6 +50,11 @@ services:
     build:
       context: ./backend-core
       dockerfile: Dockerfile
+    # Dev hot reload: code edits on the host apply instantly (no rebuild)
+    volumes:
+      - ./backend-core/app:/app/app
+      - ./backend-core/tests:/app/tests
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - "8000:8000"
     env_file:
@@ -53,6 +62,7 @@ services:
     environment:
       - PORT=8000
       - SERVICE_NAME=backend-core
+      - WATCHFILES_FORCE_POLLING=true
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_KEY=${SUPABASE_KEY}
     networks:
@@ -67,6 +77,11 @@ services:
     build:
       context: ./backend-courses
       dockerfile: Dockerfile
+    # Dev hot reload: code edits on the host apply instantly (no rebuild)
+    volumes:
+      - ./backend-courses/app:/app/app
+      - ./backend-courses/tests:/app/tests
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
     ports:
       - "8001:8001"
     env_file:
@@ -74,6 +89,7 @@ services:
     environment:
       - PORT=8001
       - SERVICE_NAME=backend-courses
+      - WATCHFILES_FORCE_POLLING=true
       - CORE_SERVICE_URL=http://backend-core:8000
       - AI_SERVICE_URL=http://backend-ai:8002
       - SUPABASE_URL=${SUPABASE_URL}
@@ -92,6 +108,11 @@ services:
     build:
       context: ./backend-ai
       dockerfile: Dockerfile
+    # Dev hot reload: code edits on the host apply instantly (no rebuild)
+    volumes:
+      - ./backend-ai/app:/app/app
+      - ./backend-ai/tests:/app/tests
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8002 --reload
     ports:
       - "8002:8002"
     env_file:
@@ -99,6 +120,7 @@ services:
     environment:
       - PORT=8002
       - SERVICE_NAME=backend-ai
+      - WATCHFILES_FORCE_POLLING=true
       - CORE_SERVICE_URL=http://backend-core:8000
       - GOOGLE_AI_KEY=${GOOGLE_AI_KEY}
       - SUPABASE_URL=${SUPABASE_URL}
@@ -117,6 +139,11 @@ services:
     build:
       context: ./backend-analytics
       dockerfile: Dockerfile
+    # Dev hot reload: code edits on the host apply instantly (no rebuild)
+    volumes:
+      - ./backend-analytics/app:/app/app
+      - ./backend-analytics/tests:/app/tests
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8003 --reload
     ports:
       - "8003:8003"
     env_file:
@@ -124,6 +151,7 @@ services:
     environment:
       - PORT=8003
       - SERVICE_NAME=backend-analytics
+      - WATCHFILES_FORCE_POLLING=true
       - CORE_SERVICE_URL=http://backend-core:8000
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_KEY=${SUPABASE_KEY}

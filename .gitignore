@@ -220,3 +220,8 @@ __marimo__/
 .streamlit/secrets.toml
 
 .env
+
+# PyCharm / JetBrains IDE settings (personal, never commit)
+.idea/
+# Claude Code personal settings (the shared .claude/settings.json IS committed)
+.claude/settings.local.json
